@@ -27,22 +27,27 @@ class MainActivity : AppCompatActivity() {
         clickButton()
         clickVolume()
         clickVibrate()
+        clickShop()
+    }
+
+    private fun clickShop() {
+        binding.buttonShop.setOnClickListener {
+            replaceActivity(ShopActivity())
+        }
     }
 
     private fun initSettings() {
         val file =
             File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString() + "/" + fileName)
-
         try {
-            if (checkFile(file)) {
-                loadSettings()
-            } else {
-                settings = Settings(true, true)
-                saveFile(volume = true, vibrate = true, nameFile = fileName)
-                loadSettings()
+            if (!checkFile(file)) {
+                settings = Settings(volume = true, vibrate = true)
+                saveFile(volume = true, vibrate = true)
             }
         } catch (e: Exception) {
             Log.d("Error", e.toString())
+        } finally {
+            loadSettings()
         }
     }
 
@@ -50,33 +55,22 @@ class MainActivity : AppCompatActivity() {
         val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
         try {
             settings = getSettings(path)
-            setSettingsButton(settings)
+            setIconSettings(settings)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun setSettingsButton(settings: Settings) {
+    private fun setIconSettings(settings: Settings) {
         when (settings.volume) {
-            true -> binding.buttonVolume.setImageResource(R.drawable.ic_volume_up_24)
-            false -> binding.buttonVolume.setImageResource(R.drawable.ic_volume_off_24)
+            true -> binding.buttonVolume.setImageResource(R.drawable.ic_volume_up)
+            false -> binding.buttonVolume.setImageResource(R.drawable.ic_volume_off)
         }
 
         when (settings.vibrate) {
-            true -> binding.buttonVibrate.setImageResource(R.drawable.ic_vibration_24)
-            false -> binding.buttonVibrate.setImageResource(R.drawable.ic_vibrate_off_24)
+            true -> binding.buttonVibrate.setImageResource(R.drawable.ic_vibration)
+            false -> binding.buttonVibrate.setImageResource(R.drawable.ic_vibrate_off)
         }
-    }
-
-    private fun saveFile(volume: Boolean, vibrate: Boolean, nameFile: String) {
-        val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
-        val json = Gson().toJson(Settings(volume, vibrate))
-        val file = File(path, nameFile)
-        val output: Writer
-
-        output = BufferedWriter(FileWriter(file))
-        output.write(json.toString())
-        output.close()
     }
 
     private fun clickButton() {
@@ -92,10 +86,16 @@ class MainActivity : AppCompatActivity() {
     private fun clickVolume() {
         binding.buttonVolume.setOnClickListener {
             try {
-                setVolume(settings)
-                showToast("Volume = " + settings.volume)
-            } catch (e: java.lang.Exception) {
+                when (settings.volume) {
+                    true -> settings.volume = false
+                    false -> settings.volume = true
+                }
+            } catch (e: Exception) {
                 e.printStackTrace()
+            }finally {
+                saveSettings(settings)
+                setIconSettings(settings)
+                showToast("Volume = " + settings.volume)
             }
         }
     }
@@ -103,32 +103,33 @@ class MainActivity : AppCompatActivity() {
     private fun clickVibrate() {
         binding.buttonVibrate.setOnClickListener {
             try {
-                setVibrate(settings)
-                showToast("Vibrate = " + settings.vibrate)
-
-            } catch (e: java.lang.Exception) {
+                when (settings.vibrate) {
+                    true -> settings.vibrate = false
+                    false -> settings.vibrate = true
+                }
+            } catch (e: Exception) {
                 e.printStackTrace()
+            }finally {
+                saveSettings(settings)
+                setIconSettings(settings)
+                showToast("Vibrate = " + settings.vibrate)
             }
         }
     }
 
-    private fun setVolume(settings: Settings) {
-        when (settings.volume) {
-            true -> settings.volume = false
-            false -> settings.volume = true
-        }
-        setSettingsButton(settings)
-        saveFile(settings.volume, settings.vibrate, fileName)
+    private fun saveSettings(settings: Settings) {
+        saveFile(settings.volume, settings.vibrate)
     }
 
-    private fun setVibrate(settings: Settings) {
-        when (settings.vibrate) {
-            true -> settings.vibrate = false
-            false -> settings.vibrate = true
-        }
-        setSettingsButton(settings)
-        saveFile(settings.volume, settings.vibrate, fileName)
+    private fun saveFile(volume: Boolean, vibrate: Boolean) {
+        val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
+        val json = Gson().toJson(Settings(volume, vibrate))
+        val file = File(path, fileName)
+        val output: Writer
 
+        output = BufferedWriter(FileWriter(file))
+        output.write(json.toString())
+        output.close()
     }
 
     override fun onDestroy() {

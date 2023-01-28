@@ -17,7 +17,6 @@ const val fileName = "Settings.json"
 fun AppCompatActivity.replaceActivity(activity: AppCompatActivity) {
     val intent = Intent(this, activity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
     startActivity(intent)
-    this.finish()
 }
 
 fun Activity.showToast(message: String) {
