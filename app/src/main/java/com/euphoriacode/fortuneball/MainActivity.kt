@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         output.close()
     }
 
-
     private fun clickButton() {
         binding.buttonClick.setOnClickListener {
             binding.textResponse.text = randomResponse(arrayResponse)
@@ -90,43 +89,42 @@ class MainActivity : AppCompatActivity() {
         return array[(array.indices).random()]
     }
 
-    private fun clickVolume(){
+    private fun clickVolume() {
         binding.buttonVolume.setOnClickListener {
             try {
                 setVolume(settings)
                 showToast("Volume = " + settings.volume)
-            }catch (e:java.lang.Exception){
+            } catch (e: java.lang.Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    private fun clickVibrate(){
+    private fun clickVibrate() {
         binding.buttonVibrate.setOnClickListener {
             try {
                 setVibrate(settings)
                 showToast("Vibrate = " + settings.vibrate)
 
-            }catch (e:java.lang.Exception){
+            } catch (e: java.lang.Exception) {
                 e.printStackTrace()
             }
         }
     }
 
     private fun setVolume(settings: Settings) {
-        when(settings.volume){
-            true-> settings.volume = false
-            false-> settings.volume = true
+        when (settings.volume) {
+            true -> settings.volume = false
+            false -> settings.volume = true
         }
         setSettingsButton(settings)
         saveFile(settings.volume, settings.vibrate, fileName)
-
     }
 
     private fun setVibrate(settings: Settings) {
-        when(settings.vibrate){
-            true-> settings.vibrate = false
-            false-> settings.vibrate = true
+        when (settings.vibrate) {
+            true -> settings.vibrate = false
+            false -> settings.vibrate = true
         }
         setSettingsButton(settings)
         saveFile(settings.volume, settings.vibrate, fileName)

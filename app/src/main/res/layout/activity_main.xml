@@ -54,6 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
             android:clickable="true"
+            android:contentDescription="volume on/off"
             app:srcCompat="@drawable/ic_volume_up_24" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -61,8 +62,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:contentDescription="vibrate on/off"
             app:srcCompat="@drawable/ic_vibration_24" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
