@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
         val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
         try {
             arrayResponse = getResponses(path)
-            setIconSettings(settings)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
             if (!checkFile(file)) {
                 Log.d("FILE", "SAVE NEW FILE")
                 settings = Settings(volume = true, vibrate = true)
-                saveSettings(volume = true, vibrate = true)
+                saveSettingsToFile(volume = true, vibrate = true)
             }
         } catch (e: Exception) {
             Log.d("Error", e.toString())
@@ -170,11 +169,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveSettings(settings: Settings) {
-        saveSettings(settings.volume, settings.vibrate)
+        saveSettingsToFile(settings.volume, settings.vibrate)
         setIconSettings(settings)
     }
 
-    private fun saveSettings(volume: Boolean, vibrate: Boolean) {
+    private fun saveSettingsToFile(volume: Boolean, vibrate: Boolean) {
         val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
         val json = Gson().toJson(Settings(volume, vibrate))
         val file = File(path, settingsFile)
