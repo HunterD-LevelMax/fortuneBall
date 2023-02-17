@@ -12,7 +12,11 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 
-const val fileName = "Settings.json"
+const val settingsFile = "Settings.json"
+const val responsesFile = "Responses.json"
+
+
+val randomResponse = arrayOf("yes", "no", "maybe", "100%", "just do it")
 
 fun AppCompatActivity.replaceActivity(activity: AppCompatActivity) {
     val intent = Intent(this, activity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
@@ -41,11 +45,18 @@ fun toGson(jsonString: String): Settings {
     return settings
 }
 
-fun getJsonStringFromFile(storageDir: String): String {
-    Log.d("json", readFile("$storageDir/$fileName", StandardCharsets.UTF_8))
-    return readFile("$storageDir/$fileName", StandardCharsets.UTF_8)
+fun toGsonResponses(jsonString: String): ResponsesArray {
+    val responsesArray = Gson().fromJson(jsonString, ResponsesArray::class.java)
+    return responsesArray
+}
+
+fun getJsonStringFromFile(storageDir: String, fileName: String): String {
+    return File(storageDir, fileName).readText()
 }
 
 fun getSettings(storageDir: String): Settings {
-    return toGson(getJsonStringFromFile(storageDir))
+    return toGson(getJsonStringFromFile(storageDir, settingsFile))
+}
+fun getResponses(storageDir: String): ResponsesArray {
+    return toGsonResponses(getJsonStringFromFile(storageDir, responsesFile))
 }

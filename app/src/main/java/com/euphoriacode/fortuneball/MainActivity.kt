@@ -1,5 +1,6 @@
 package com.euphoriacode.fortuneball
 
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -14,8 +15,8 @@ import java.io.Writer
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var settings: Settings
-    private var arrayResponse = arrayOf("yes", "no", "maybe", "100%", "just do it")
-
+    private var arrayResponse = ResponsesArray(arrayOf())
+    private lateinit var mediaPlayer: MediaPlayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,26 +24,54 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         initSettings()
-
+        initResponses()
         clickButton()
-        clickVolume()
-        clickVibrate()
+        switchVolume()
+        switchVibrate()
         clickShop()
+
     }
 
-    private fun clickShop() {
-        binding.buttonShop.setOnClickListener {
-            replaceActivity(ShopActivity())
+    private fun initResponses() {
+        val path =
+            File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString(), responsesFile)
+
+        try {
+            if (!checkFile(path)) {
+                arrayResponse = ResponsesArray(randomResponse)
+                saveResponses(arrayResponse)
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+        } finally {
+            loadResponses()
         }
+    }
+
+    //load responses from json file
+    private fun loadResponses() {
+        val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
+        try {
+            arrayResponse = getResponses(path)
+            setIconSettings(settings)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun randomResponse(array: ResponsesArray): String {
+        val random = (0..array.array.size - 1).random()
+        return array.array[random]
     }
 
     private fun initSettings() {
         val file =
-            File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString() + "/" + fileName)
+            File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString(), settingsFile)
         try {
             if (!checkFile(file)) {
+                Log.d("FILE", "SAVE NEW FILE")
                 settings = Settings(volume = true, vibrate = true)
-                saveFile(volume = true, vibrate = true)
+                saveSettings(volume = true, vibrate = true)
             }
         } catch (e: Exception) {
             Log.d("Error", e.toString())
@@ -51,13 +80,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //load settings from json file
     private fun loadSettings() {
         val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
         try {
             settings = getSettings(path)
+            Log.d("FILE", "LOAD")
             setIconSettings(settings)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    //add delay coroutine
+    private fun clickButton() {
+        binding.buttonClick.setOnClickListener {
+            binding.textResponse.text = randomResponse(arrayResponse)
+            playSound(settings)
+            startVibrate(settings)
+        }
+    }
+
+    private fun startVibrate(settings: Settings) {
+        when (settings.vibrate) {
+            true -> return
+            else -> return
+        }
+    }
+
+    //play random sound
+    private fun playSound(settings: Settings) {
+        val arraySound = arrayOf(R.raw.sound_1, R.raw.sound_2, R.raw.sound_3, R.raw.sound_4)
+        mediaPlayer = MediaPlayer.create(this, arraySound[(arraySound.indices).random()])
+
+        when (settings.volume) {
+            true -> mediaPlayer.start()
+            else -> return
+        }
+    }
+
+    private fun clickShop() {
+        binding.buttonShop.setOnClickListener {
+            replaceActivity(ShopActivity())
         }
     }
 
@@ -73,17 +137,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun clickButton() {
-        binding.buttonClick.setOnClickListener {
-            binding.textResponse.text = randomResponse(arrayResponse)
-        }
-    }
 
-    private fun randomResponse(array: Array<String>): String {
-        return array[(array.indices).random()]
-    }
+    private fun switchVolume() {
 
-    private fun clickVolume() {
         binding.buttonVolume.setOnClickListener {
             try {
                 when (settings.volume) {
@@ -92,15 +148,13 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-            }finally {
+            } finally {
                 saveSettings(settings)
-                setIconSettings(settings)
-                showToast("Volume = " + settings.volume)
             }
         }
     }
 
-    private fun clickVibrate() {
+    private fun switchVibrate() {
         binding.buttonVibrate.setOnClickListener {
             try {
                 when (settings.vibrate) {
@@ -109,23 +163,35 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-            }finally {
+            } finally {
                 saveSettings(settings)
-                setIconSettings(settings)
-                showToast("Vibrate = " + settings.vibrate)
             }
         }
     }
 
     private fun saveSettings(settings: Settings) {
-        saveFile(settings.volume, settings.vibrate)
+        saveSettings(settings.volume, settings.vibrate)
+        setIconSettings(settings)
     }
 
-    private fun saveFile(volume: Boolean, vibrate: Boolean) {
+    private fun saveSettings(volume: Boolean, vibrate: Boolean) {
         val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
         val json = Gson().toJson(Settings(volume, vibrate))
-        val file = File(path, fileName)
+        val file = File(path, settingsFile)
         val output: Writer
+        Log.d("FILE", "SAVE SETTINGS")
+
+        output = BufferedWriter(FileWriter(file))
+        output.write(json.toString())
+        output.close()
+    }
+
+    private fun saveResponses(array: ResponsesArray) {
+        val path = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).toString()
+        val json = Gson().toJson(array)
+        val file = File(path, responsesFile)
+        val output: Writer
+        Log.d("FILE", "SAVE RESPONSES")
 
         output = BufferedWriter(FileWriter(file))
         output.write(json.toString())
