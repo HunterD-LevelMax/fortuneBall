@@ -14,7 +14,7 @@ import java.nio.file.Paths
 
 const val settingsFile = "Settings.json"
 const val responsesFile = "Responses.json"
-
+const val path = "/storage/emulated/0/Android/data/com.euphoriacode.fortuneball/files/Documents/"
 
 val randomResponse = arrayOf("yes", "no", "maybe", "100%", "just do it")
 
@@ -57,6 +57,10 @@ fun getJsonStringFromFile(storageDir: String, fileName: String): String {
 fun getSettings(storageDir: String): Settings {
     return toGson(getJsonStringFromFile(storageDir, settingsFile))
 }
-fun getResponses(storageDir: String): ResponsesArray {
-    return toGsonResponses(getJsonStringFromFile(storageDir, responsesFile))
+
+fun getResponses(path: String): ResponsesArray {
+    return toGsonResponses(getJsonStringFromFile(path, responsesFile))
 }
+
+
+

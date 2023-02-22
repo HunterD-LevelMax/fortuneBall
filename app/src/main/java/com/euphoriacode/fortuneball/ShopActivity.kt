@@ -18,4 +18,9 @@ class ShopActivity : AppCompatActivity() {
 
 
 
+
+
+
+
+
 }
